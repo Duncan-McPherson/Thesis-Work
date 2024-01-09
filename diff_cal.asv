@@ -1,0 +1,29 @@
+Zero = load("Analysis\T_14_Opt.mat");
+
+load("UBC Data\Ranges.mat")
+for j = [4,13,1]
+    load("Analysis\T_"+j+"_Opt.mat");
+    name = "UBC Data\Data_Trial_"+j+".mat";
+   
+    diff_LS = 100*abs((Zero.beta-beta)./Zero.beta)
+    diff_KLS = 100*abs((Zero.kbeta-kbeta)./Zero.kbeta)
+
+    t1 = t(Ns(j):Ne(j))-t(Ns(j));
+    Vm = VelocityXAct(Ns(i):Ne(i))*(1e-3/60); %Convert mm/min to m/s
+
+    dt = t1(2)-t1(1); %Sampling time
+    dS = 20; %Downsampling Rate
+    N = 10000; %Sampling window
+    fc = 1/(2*dt*dS); %Cutoff Freq
+    fs = 1/dt; %Sampling Freq
+    [b,a] = butter(6,fc/(fs/2));
+
+    Vm_ds = downsample(filtfilt(b,a,Vm),dS);
+    t2 = downsample(t1,dS);
+
+    figure(j)
+    plot(t2(2:end), Vm_ds(2:end))
+    plot(t2(2:end), y_ls)
+    plot(t2(2:end), y_kls)
+    title("Test #"+j":Velocity Output"); xlabel("Time [s]");ylabel("Velocity [m/s]")
+end
